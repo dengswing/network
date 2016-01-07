@@ -48,12 +48,12 @@ namespace Networks
         public NetTimerDelegate netTimeOut;
 
         /// <summary>
-        /// 请求地址
+        /// 请求地址 too:变化
         /// </summary>
         public string requestURL = "http://dev-soul.shinezoneapp.com/?dev=jinfeifei&*=[{0}]";
 
         /// <summary>
-        /// 接口及参数
+        /// 接口及参数  too:移动
         /// </summary>
         public string requestParams = "[\"{0}\",[{1}]]";
 
