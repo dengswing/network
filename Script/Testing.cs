@@ -48,7 +48,7 @@ class Testing : MonoBehaviour
 
     void PostOneToOneHandler(string cmd, int res, string value)
     {
-        Debug.Log("Testing:PostOneToOneHandler:response:" + cmd + "|" + res);
+       // Debug.Log("Testing:PostOneToOneHandler:response:" + cmd + "|" + res);
     }
 
     void Update() 
