@@ -25,9 +25,9 @@ namespace Networks
         public string requestURL;
 
         /// <summary>
-        /// 接口及参数
+        /// 接口参数
         /// </summary>
-        public string requestParams;
+        string requestParams = "[\"{0}\",[{1}]]";
 
 
         PostData _currentPostData;
@@ -121,6 +121,20 @@ namespace Networks
         }
 
         /// <summary>
+        /// 所有的请求
+        /// </summary>
+        /// <param name="time">服务器时间</param>
+        /// <returns></returns>
+        public string AllRequestData(long time)
+        {
+            if (groupData.Count <= 0) return null;
+            string urlParams = PostParamGroup(null, time, userID, requestParams, true);
+            if (urlParams == null) return null;
+
+            return string.Format(requestURL, urlParams); //url组装
+        }
+
+        /// <summary>
         /// 进行下一组请求
         /// </summary>
         /// <returns>true:应许</returns>
@@ -150,10 +164,10 @@ namespace Networks
         /// <param name="userId">用户id</param>
         /// <param name="param">参数组装格式</param>
         /// <returns></returns>
-        string PostParamGroup(IPostData data, long time, string userId, string param)
+        string PostParamGroup(IPostData data, long time, string userId, string param, bool isAll = false)
         {
             string urlValue = "";
-            int count = (int)Mathf.Min((float)requestGroupMax, (float)groupData.Count);
+            int count = (isAll ? groupData.Count : (int)Mathf.Min((float)requestGroupMax, (float)groupData.Count));
             for (int i = 0; i < count; i += 1)
             {
                 ArrayList tmpData = groupData.Dequeue() as ArrayList; //拉取一个
@@ -161,7 +175,7 @@ namespace Networks
                 string commandId = tmpData[0] as string;
                 urlValue += ParamtersPack(commandId, args, time, userId, param);  //参数组装
 
-                if (!data.commandId.Contains(commandId))
+                if (null != data && !data.commandId.Contains(commandId))
                 {
                     data.commandId.Add(commandId);
                     data.resultBack.Add((HttpNetResultDelegate)tmpData[2]);

@@ -48,14 +48,9 @@ namespace Networks
         public NetTimerDelegate netTimeOut;
 
         /// <summary>
-        /// 请求地址 too:变化
+        /// 请求地址
         /// </summary>
-        public string requestURL = "http://dev-soul.shinezoneapp.com/?dev=jinfeifei&*=[{0}]";
-
-        /// <summary>
-        /// 接口及参数  too:移动
-        /// </summary>
-        public string requestParams = "[\"{0}\",[{1}]]";
+        public string requestURL = "http://dev-soul.shinezoneapp.com/?&*=[{0}]";
 
         /// <summary>
         /// 等待请求时间（单位秒）
@@ -189,10 +184,22 @@ namespace Networks
         /// </summary>
         public void Clear()
         {
-            StopCoroutine("PostAsync");
-            queueDataGroup.Clear();
-            netTimer.Clear();
-            Debug.LogWarning("HttpNetManager::ResetSend :Error:Remove all request!");
+            RemoveAllRequset();
+        }
+
+        /// <summary>
+        /// 清除所有未请求的数据
+        /// </summary>
+        /// <param name="sendAllData">是否发送所有未发送的请求</param>
+        public void Clear(bool isSendAllData)
+        {
+            if (isSendAllData)
+            {
+                string URL = queueDataGroup.AllRequestData(serverTime);
+                if (URL != null) StartCoroutine(PostSingle(null, URL, null));
+            }
+
+            Clear();
         }
 
         /// <summary>
@@ -243,20 +250,6 @@ namespace Networks
             SendOneToOne(commandId, args, resultBack, url);
         }
 
-        /// <summary>
-        /// 发送一对一请求
-        /// </summary>
-        /// <param name="commandId"></param>
-        /// <param name="args"></param>
-        /// <param name="resultBack"></param>
-        /// <param name="url"></param>
-        void SendOneToOne(string commandId, List<object> args, HttpNetResultDelegate resultBack, string url)
-        {
-            if (url == null) url = requestURL;
-            string URL = queueDataGroup.OneToOnePostDataPack(commandId, args, serverTime, url);
-            StartCoroutine(PostSingle(commandId, URL, resultBack));
-        }
-
         void Awake()
         {
             _Instance = this;
@@ -273,9 +266,7 @@ namespace Networks
         {
             queueDataGroup = new QueueDataGroupManager();
             queueDataGroup.requestGroupMax = requestGroupMax;
-            queueDataGroup.userID = userID;
             queueDataGroup.requestURL = requestURL;
-            queueDataGroup.requestParams = requestParams;
 
             netTimer = new NetTimerManager();
             netTimer.resetSend = ResetSend;
@@ -301,6 +292,14 @@ namespace Networks
             }
         }
 
+        void RemoveAllRequset()
+        {
+            StopCoroutine("PostAsync");
+            queueDataGroup.Clear();
+            netTimer.Clear();
+            Debug.LogWarning("HttpNetManager::ResetSend :Error:Remove all request!");
+        }
+
         /// <summary>
         /// 发送请求
         /// </summary>
@@ -324,6 +323,20 @@ namespace Networks
 
             Debug.LogWarning("HttpNetManager::ResetSend :reset send commandId:[" + postData.ToString() + "]" + isReset);
             StartCoroutine(PostAsync(postData, isReset));
+        }
+
+        /// <summary>
+        /// 发送一对一请求
+        /// </summary>
+        /// <param name="commandId">接口名称</param>
+        /// <param name="url">请求路径</param>
+        /// <param name="resultBack">回调委托</param>
+        /// <param name="c">参数</param>
+        void SendOneToOne(string commandId, List<object> args, HttpNetResultDelegate resultBack, string url)
+        {
+            if (url == null) url = requestURL;
+            string URL = queueDataGroup.OneToOnePostDataPack(commandId, args, serverTime, url);
+            StartCoroutine(PostSingle(commandId, URL, resultBack));
         }
 
         /// <summary>
@@ -360,7 +373,7 @@ namespace Networks
             WWW www = new WWW(url);
             yield return www;
 
-            // yield break;    //测试超时
+            //yield break;    //测试超时
 
             Debug.Log("<< [" + data.ToString() + "]:" + www.text);
             netTimer.StopTime(); //计时停止

@@ -40,6 +40,7 @@
 			ResetStart();
 		}
 
+        //int k;
 		/// <summary>
         /// 更新时间，使用继承了MonoBehaviour的类来更新
 		/// </summary>
@@ -48,8 +49,15 @@
 		{
 			if (bRunning)
 			{
-				currentTime += deltaTime;	
-			    
+				currentTime += deltaTime;
+
+
+                //if (UnityEngine.Mathf.FloorToInt(currentTime) != k)
+                //{
+                //    k = UnityEngine.Mathf.FloorToInt(currentTime);
+                //    UnityEngine.Debug.Log("||==>" + k + "|" + currentTime + "|" + spacingTime);
+                //}
+
 				if (currentTime > spacingTime)
 				{
                     Stop();

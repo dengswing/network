@@ -10,11 +10,7 @@ class Testing : MonoBehaviour
     void Start()
     {
         httpNetwork = HttpNetManager.Instance;
-        httpNetwork.requestURL = "http://dev-soul.shinezoneapp.com/?&*=[{0}]"; //请求地址
-        httpNetwork.requestParams = "[\"{0}\",[{1}]]"; //参数组装
         httpNetwork.userID = "77"; //用户id
-        httpNetwork.waitResponseTime = 3;
-        httpNetwork.resetSendMax = 2;
 
         httpNetwork.RegisterResponse("game.login", ResponseHandler);  //单个接口的侦听
 		httpNetwork.serverErrorResponse = ServerErrorHandler;
@@ -27,10 +23,10 @@ class Testing : MonoBehaviour
         httpNetwork.Post("game.login", ResponseHandler);
 
 
-        httpNetwork.PostOneToOne("game.login");
-        httpNetwork.PostOneToOne("game.login", PostOneToOneHandler);
-        httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}");
-        httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}", PostOneToOneHandler);
+      //  httpNetwork.PostOneToOne("game.login");
+      //  httpNetwork.PostOneToOne("game.login", PostOneToOneHandler);
+      //  httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}");
+       // httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}", PostOneToOneHandler);
     }
 
     void ResponseHandler(string cmd, int res, string value)
@@ -65,6 +61,10 @@ class Testing : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S))
         {
             httpNetwork.Clear(); //重置
+        }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            httpNetwork.Clear(true); //重置
         }
     }
 

@@ -1,12 +1,13 @@
-﻿namespace Networks
+﻿using UnityEngine;
+namespace Networks
 {
     internal class NetTimerManager
     {
         /// <summary>
         /// 等待请求时间（单位秒）
         /// </summary>
-        public float waitResponseTime = 5;
-
+        private float _waitResponseTime = 5;
+       
         /// <summary>
         /// 最大重发次数
         /// </summary>
@@ -35,6 +36,8 @@
         //是否超时
         bool _isTimeOut;
 
+        float lastTime;
+
         /// <summary>
         /// 是否超时
         /// </summary>
@@ -50,18 +53,36 @@
         }
 
         /// <summary>
+        /// 等待请求时间（单位秒）
+        /// </summary>
+        public float waitResponseTime
+        {
+            get { return _waitResponseTime; }
+            set 
+            {
+                _waitResponseTime = value;
+                simpleTimer.ResetSpacingTime(_waitResponseTime);
+            }
+        }
+
+        /// <summary>
         /// 更新时间
         /// </summary>
         public void UpdateTime()
         {
-            if (simpleTimer.isRunning) simpleTimer.Update(UnityEngine.Time.deltaTime);
+            if (simpleTimer.isRunning)
+            {
+                float deltaTime = Time.realtimeSinceStartup - (float)lastTime;
+                lastTime = Time.realtimeSinceStartup;
+                simpleTimer.Update(deltaTime);
+            }
         }
 
         /// <summary>
         /// 开始运行时间
         /// </summary>
         public void StartTime()
-        {
+        {           
             Running();
         }
 
@@ -102,6 +123,7 @@
 
         void Running()
         {
+            lastTime = Time.realtimeSinceStartup;
             simpleTimer.Start();
         }
 
