@@ -2,12 +2,7 @@
 namespace Networks
 {
     internal class NetTimerManager
-    {
-        /// <summary>
-        /// 等待请求时间（单位秒）
-        /// </summary>
-        private float _waitResponseTime = 5;
-       
+    {       
         /// <summary>
         /// 最大重发次数
         /// </summary>
@@ -36,7 +31,11 @@ namespace Networks
         //是否超时
         bool _isTimeOut;
 
+        //最后时间
         float lastTime;
+
+        //等待请求时间（单位秒）
+        float _waitResponseTime = 5;
 
         /// <summary>
         /// 是否超时
