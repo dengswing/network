@@ -275,7 +275,7 @@
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="Left" type="integer">1164</XPD:ATTR>
-<XPD:ATTR name="Top" type="integer">584</XPD:ATTR>
+<XPD:ATTR name="Top" type="integer">596</XPD:ATTR>
 <XPD:ATTR name="Width" type="integer">128</XPD:ATTR>
 <XPD:ATTR name="Height" type="integer">53</XPD:ATTR>
 <XPD:ATTR name="Text" type="string">时间定时器
@@ -287,7 +287,7 @@
 <XPD:ATTR name="LineColor" type="string">clMaroon</XPD:ATTR>
 <XPD:ATTR name="FillColor" type="string">$00B9FFFF</XPD:ATTR>
 <XPD:ATTR name="LineStyle" type="LineStyleKind">lsRectilinear</XPD:ATTR>
-<XPD:ATTR name="Points" type="Points">1164,604;1130,604</XPD:ATTR>
+<XPD:ATTR name="Points" type="Points">1263,596;1263,592;1130,592</XPD:ATTR>
 <XPD:REF name="Head">i/6LCEOm00+DmnbTfMuluwAA</XPD:REF>
 <XPD:REF name="Tail">tIFaTwXqz06v9oKAAQHdFAAA</XPD:REF>
 </XPD:OBJ>
