@@ -142,7 +142,6 @@ namespace Networks
         {
             get
             {
-                _currentPostData = null;
                 return (groupData.Count > 0);
             }
         }
@@ -153,6 +152,14 @@ namespace Networks
         public void Clear()
         {
             groupData.Clear();
+            FinishPost();
+        }
+
+        /// <summary>
+        /// 完成了单次请求
+        /// </summary>
+        public void FinishPost() 
+        {
             _currentPostData = null;
         }
 

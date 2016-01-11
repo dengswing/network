@@ -8,6 +8,29 @@ using Networks.parser;
 
 namespace Networks
 {
+
+#if UNITY_EDITOR
+    public enum StatusType
+    {
+        /// <summary>
+        /// 正常流程
+        /// </summary>
+        NORMAL,
+        /// <summary>
+        /// 请求超时
+        /// </summary>
+        NET_TIME_OUT,
+        /// <summary>
+        /// 服务器连接失败
+        /// </summary>
+        CONNECT_ERROR,
+        /// <summary>
+        /// 后端返回失败
+        /// </summary>
+        SERVER_ERROR
+    }
+#endif
+
     /// <summary>
     /// http请求
     /// </summary>
@@ -90,6 +113,14 @@ namespace Networks
         //数据解析
         INetworkDataParse netParser;
 
+#if UNITY_EDITOR
+        StatusType _statusType;
+        public StatusType statusType
+        {
+            get { return _statusType; }
+            set { _statusType = value; }
+        }
+#endif
 
         /// <summary>
         /// 用户id
@@ -250,6 +281,40 @@ namespace Networks
             SendOneToOne(commandId, args, resultBack, url);
         }
 
+        /// <summary>
+        /// 服务器时间
+        /// </summary>
+        public long gmt
+        {
+            get { return serverTime; }
+        }
+
+        /// <summary>
+        /// 重置本地时间
+        /// </summary>
+        public void ResetLocalTime()
+        {
+            localTime = DateTime.Now;
+        }
+
+        /// <summary>
+        /// 设置初始化值
+        /// </summary>
+        public void InitValue()
+        {
+            if (null != queueDataGroup)
+            {
+                queueDataGroup.requestGroupMax = requestGroupMax;
+                queueDataGroup.requestURL = requestURL;
+            }
+
+            if (null != netTimer)
+            {
+                netTimer.waitResponseTime = waitResponseTime;
+                netTimer.resetSendMax = resetSendMax;
+            }
+        }
+
         void Awake()
         {
             _Instance = this;
@@ -265,14 +330,11 @@ namespace Networks
         void Init()
         {
             queueDataGroup = new QueueDataGroupManager();
-            queueDataGroup.requestGroupMax = requestGroupMax;
-            queueDataGroup.requestURL = requestURL;
-
             netTimer = new NetTimerManager();
             netTimer.resetSend = ResetSend;
             netTimer.netTimeOut = NetTimeOut;
-            netTimer.waitResponseTime = waitResponseTime;
-            netTimer.resetSendMax = resetSendMax;
+
+            InitValue();
         }
 
         /// <summary>
@@ -367,22 +429,42 @@ namespace Networks
             if (netTimer.isTimeOut) yield break;    //超时退出请求
 
             if (!isReset) netTimer.StartTime(); //计时开始
-
             string url = data.url;
+
+#if UNITY_EDITOR
+            if (statusType == StatusType.CONNECT_ERROR) url = "content::" + url;
+#endif
+
             Debug.Log(">>:" + url);
             WWW www = new WWW(url);
             yield return www;
 
-            //yield break;    //测试超时
+#if UNITY_EDITOR
+            if (statusType == StatusType.NET_TIME_OUT) yield break;
+#endif
 
             Debug.Log("<< [" + data.ToString() + "]:" + www.text);
             netTimer.StopTime(); //计时停止
 
             if (netTimer.isTimeOut) yield break;    //超时退出请求,防止超时了还回来数据
 
+            if (www.error != null)
+            { //处理404
+                Debug.LogWarning("HttpNetManager::PostAsync Error:" + www.error);
+                serverErrorResponse(www.error, -1, "error");
+                yield break;    //测试超时
+            }
+
+            queueDataGroup.FinishPost();    //完成了本次请求
+
             string result = www.text;
             int res = -1;
             string errMsg = "";
+
+#if UNITY_EDITOR
+            if (statusType == StatusType.SERVER_ERROR) result = "{\"code\":10511,\"msg\":\"CommonVoList: Element 1 cannot be found in MissionLastVoList.\",\"gmt\":1452475369}";
+#endif
+
             try
             {
                 if (netParser == null)
@@ -420,11 +502,12 @@ namespace Networks
             int count = data.commandId.Count;
             string commandId;
             HttpNetResultDelegate resultBack;
+
+
             for (int i = 0; i < count; i += 1)
             {
                 commandId = data.commandId[i];
-
-                if (onResponseDict.ContainsKey(commandId))
+                if (onResponseDict.ContainsKey(commandId) && onResponseDict[commandId] != null)
                 {
                     onResponseDict[commandId](commandId, res, result);
                 }
@@ -456,6 +539,12 @@ namespace Networks
             Debug.Log("singlePost>>:" + url);
             WWW www = new WWW(url);
             yield return www;
+            if (www.error != null)
+            {
+                Debug.Log("singlePost:<< Error:" + www.error);
+                yield break;
+            }
+
             if (resultBack != null)
             {
                 resultBack(commandId, NetworkDataParser.RESPONSE_CODE_RESULT_SUCCESS, www.text);
