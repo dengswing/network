@@ -17,7 +17,7 @@ class Testing : MonoBehaviour
         httpNetwork.statusType = statusType;
 
         httpNetwork.RegisterResponse("game.login", ResponseHandler);  //单个接口的侦听
-		httpNetwork.serverErrorResponse = ServerErrorHandler;
+        httpNetwork.serverErrorResponse = ServerErrorHandler;
         httpNetwork.netTimeOut = NetTimeOutHandler;  //网络超时
 
         httpNetwork.Post("game.reset", ResponseHandler);
@@ -27,10 +27,10 @@ class Testing : MonoBehaviour
         httpNetwork.Post("game.login", ResponseHandler);
 
         //测试单一的请求
-      //  httpNetwork.PostOneToOne("game.login");
-      //  httpNetwork.PostOneToOne("game.login", PostOneToOneHandler);
-       // httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}");
-       // httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}", PostOneToOneHandler);
+        //  httpNetwork.PostOneToOne("game.login");
+        //  httpNetwork.PostOneToOne("game.login", PostOneToOneHandler);
+        // httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}");
+        // httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}", PostOneToOneHandler);       
     }
 
 
