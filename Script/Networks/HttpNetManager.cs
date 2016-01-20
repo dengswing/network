@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System;
 using Networks.parser;
 using Networks.interfaces;
-using Networks.parser;
 
 namespace Networks
 {
@@ -113,6 +112,12 @@ namespace Networks
         //数据解析
         INetworkDataParse netParser;
 
+        //是否连接error
+        bool isContentError;
+
+        //是否触发了更新
+        bool isTouchLate;
+
 #if UNITY_EDITOR
         StatusType _statusType;
         public StatusType statusType
@@ -177,7 +182,6 @@ namespace Networks
         {
             List<object> args = new List<object>(c);
             queueDataGroup.AddRequest(commandId, args);
-            SendRequest();
         }
 
         /// <summary>
@@ -190,7 +194,6 @@ namespace Networks
         {
             List<object> args = new List<object>(c);
             queueDataGroup.AddRequest(commandId, args, resultBack);
-            SendRequest();
         }
 
         /// <summary>
@@ -201,7 +204,6 @@ namespace Networks
             //超时了允许重发
             if (netTimer.isTimeOut)
             {
-                netTimer.Reset();
                 ResetSendRequest(false);
             }
             else
@@ -327,6 +329,15 @@ namespace Networks
             if (netTimer != null) netTimer.UpdateTime(); //更新定时器时间
         }
 
+        void LateUpdate()
+        {
+            if (!isTouchLate)
+            {
+                isTouchLate = true;
+                SendRequest();
+            }
+        }
+
         void Init()
         {
             queueDataGroup = new QueueDataGroupManager();
@@ -367,6 +378,13 @@ namespace Networks
         /// </summary>
         void SendRequest()
         {
+            if (isContentError)
+            {   //上一次请求断网、继续尝试下一次请求
+                isContentError = false;
+                ResetSendRequest(false); //重发 
+                return;
+            }
+
             if (!queueDataGroup.isCanSend) return; //没有请求
 
             IPostData postData = queueDataGroup.GroupPostDataPack(serverTime);
@@ -449,10 +467,15 @@ namespace Networks
             if (netTimer.isTimeOut) yield break;    //超时退出请求,防止超时了还回来数据
 
             if (www.error != null)
-            { //处理404
+            { //处理404  todo  断网应该如何处理
                 Debug.LogWarning("HttpNetManager::PostAsync Error:" + www.error);
                 serverErrorResponse(www.error, -1, "error");
+                isContentError = true;
                 yield break;    //测试超时
+            }
+            else
+            {
+                isContentError = false;
             }
 
             queueDataGroup.FinishPost();    //完成了本次请求
@@ -476,11 +499,13 @@ namespace Networks
             }
             catch (Exception e)
             {
+                errMsg = url;
                 Debug.LogWarning("HttpNetManager::PostAsync Error : commandId:[" + data.ToString() + "]error:" + e.Message + " Trace [" + e.StackTrace + "]");
                 TriggerResponse(data, res, result, errMsg, true);
                 yield break;
             }
 
+            errMsg = url;
             TriggerResponse(data, res, result, errMsg);
 
             if (res == NetworkDataParser.RESPONSE_CODE_RESULT_SUCCESS && queueDataGroup.NextSendRequest)
@@ -499,11 +524,15 @@ namespace Networks
         /// <param name="isError"></param>
         void TriggerResponse(IPostData data, int res, string result, string errMsg, bool isError = false)
         {
+            if (serverErrorResponse != null && res != NetworkDataParser.RESPONSE_CODE_RESULT_SUCCESS)
+            { //异常先抛出
+                Debug.LogWarning("HttpNetManager::TriggerResponse Error : commandId:[" + data.ToString() + "]error:" + errMsg);
+                serverErrorResponse(errMsg, res, result);
+            }
+
             int count = data.commandId.Count;
             string commandId;
             HttpNetResultDelegate resultBack;
-
-
             for (int i = 0; i < count; i += 1)
             {
                 commandId = data.commandId[i];
@@ -520,12 +549,6 @@ namespace Networks
                         resultBack(commandId, res, result);
                     }
                 }
-            }
-
-            if (serverErrorResponse != null && res != NetworkDataParser.RESPONSE_CODE_RESULT_SUCCESS)
-            {
-                Debug.LogWarning("HttpNetManager::TriggerResponse Error : commandId:[" + data.ToString() + "]error:" + errMsg);
-                serverErrorResponse(errMsg, res, result);
             }
         }
 

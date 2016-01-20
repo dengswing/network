@@ -81,8 +81,9 @@ namespace Networks
         /// 开始运行时间
         /// </summary>
         public void StartTime()
-        {           
-            Running();
+        {
+            Reset();
+            Running();            
         }
 
         /// <summary>
@@ -105,7 +106,7 @@ namespace Networks
         /// <summary>
         /// 超时了，允许在次重发
         /// </summary>
-        public void Reset() 
+        void Reset() 
         {
             _isTimeOut = false;
             _currentCount = 1;
