@@ -19,3 +19,9 @@ public delegate void QueueDataGroupDelegate();
 /// <param name="res">0:成功,其他值:失败</param>
 /// <param name="value">请求返回的结果</param>
 public delegate void HttpNetResultDelegate(string cmd, int res, string value);
+
+/// <summary>
+/// 数据变更委托
+/// </summary>
+/// <param name="data">数据</param>
+public delegate void DataTableUpdateDelegate(object data);

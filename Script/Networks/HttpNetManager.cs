@@ -317,6 +317,15 @@ namespace Networks
             }
         }
 
+        /// <summary>
+        /// 注入数据表结构
+        /// </summary>
+        /// <param name="dataTable"></param>
+        public void RegisterTableDataStruct(AbsTableDataStruct dataTable)
+        {
+            TableDataManager.Instance.tableDataStruct = dataTable;
+        }
+
         void Awake()
         {
             _Instance = this;

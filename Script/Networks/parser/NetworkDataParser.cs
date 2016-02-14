@@ -15,7 +15,11 @@ namespace Networks.parser
         /// </summary>
         public const int RESPONSE_CODE_RESULT_SUCCESS = 0;
 
-        long _serverTime; //服务器时间
+        //服务器时间
+        long _serverTime; 
+
+        //数据表管理
+        TableDataManager dataTableManager = TableDataManager.Instance;   
 
         /// <summary>
         /// 服务器时间
@@ -34,7 +38,7 @@ namespace Networks.parser
         public int ParseData(string netstringBuff, out string serverMsg)
         {
             IServerResponseData objServerResponseData = JsonDataManager.Instance.ParseJsonDataFromServer(netstringBuff);
-            TableDataManager.Instance.currentResponseData = objServerResponseData;
+            dataTableManager.currentResponseData = objServerResponseData;
 
             serverMsg = objServerResponseData.errMsg;
             _serverTime = objServerResponseData.serverTime;
@@ -59,6 +63,11 @@ namespace Networks.parser
             }
 
             data.updataListTableStruct = TableChangeStruct(data.updateListData); //更新的内容
+
+            foreach (var j in data.updataListTableStruct)
+            {
+                dataTableManager.FireNotice(j.Key, j.Value);
+            }
         }
 
         /// <summary>
@@ -86,9 +95,11 @@ namespace Networks.parser
         /// <returns></returns>
         object TableStructConstructor(string tableName, object value)
         {
-            Type table = TableDataManager.Instance.findTableTypeData(tableName);
+            Type table = dataTableManager.findTableTypeData(tableName);
             if (table == null) return StringChangeValue(value.ToString());  //数据结构不存在，直接返回值
-            return MatchingTableStruct(tableName, value, table);
+            object tableData = MatchingTableStruct(tableName, value, table);
+            dataTableManager.AddTableData(tableName, tableData);
+            return tableData;
         }
 
         /// <summary>
