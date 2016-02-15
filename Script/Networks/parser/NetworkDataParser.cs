@@ -16,10 +16,10 @@ namespace Networks.parser
         public const int RESPONSE_CODE_RESULT_SUCCESS = 0;
 
         //服务器时间
-        long _serverTime; 
+        long _serverTime;
 
         //数据表管理
-        TableDataManager dataTableManager = TableDataManager.Instance;   
+        TableDataManager dataTableManager = TableDataManager.Instance;
 
         /// <summary>
         /// 服务器时间
@@ -58,7 +58,7 @@ namespace Networks.parser
             Dictionary<string, object> allTableData;
             foreach (var i in data.msgListData)
             {
-                allTableData = TableChangeStruct(i);
+                allTableData = TableChangeStruct(i, true);
                 data.msgListTableStruct.Add(allTableData);
             }
 
@@ -75,13 +75,14 @@ namespace Networks.parser
         /// </summary>
         /// <param name="jsonData">所有表格数据</param>
         /// <returns></returns>
-        Dictionary<string, object> TableChangeStruct(Dictionary<string, object> jsonData)
+        Dictionary<string, object> TableChangeStruct(Dictionary<string, object> jsonData, bool isAdd = false)
         {
             Dictionary<string, object> allTableData = new Dictionary<string, object>(); //表结构 string表名、object表数据[按记录存]   
             foreach (var i in jsonData)
             {
                 object tableStruct = TableStructConstructor(i.Key, i.Value);
                 allTableData.Add(i.Key, tableStruct);
+                if (isAdd) dataTableManager.AddTableData(i.Key, tableStruct);
             }
 
             return allTableData;
@@ -98,7 +99,6 @@ namespace Networks.parser
             Type table = dataTableManager.findTableTypeData(tableName);
             if (table == null) return StringChangeValue(value.ToString());  //数据结构不存在，直接返回值
             object tableData = MatchingTableStruct(tableName, value, table);
-            dataTableManager.AddTableData(tableName, tableData);
             return tableData;
         }
 
@@ -111,7 +111,7 @@ namespace Networks.parser
         /// <returns></returns>
         object MatchingTableStruct(string tableName, object value, Type classStruct)
         {
-            if (value == "") return StringChangeValue(value.ToString()); //直接返回值
+            //if (value == "") return StringChangeValue(value.ToString()); //直接返回值
 
             List<Dictionary<string, string>> tableStruct = JsonDataManager.Instance.GetTableStruct(value); //转换json数据
 

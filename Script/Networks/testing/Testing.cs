@@ -36,7 +36,6 @@ class Testing : MonoBehaviour
         // httpNetwork.PostOneToOne("game.login", "Http://test.com/&*={0}", PostOneToOneHandler);      
 
         TableDataManager.Instance.AddListenerDataTable("CityOrder", updateHandler); //注册侦听更改  new
-       
     }
 
     void updateHandler(object data)
@@ -46,7 +45,7 @@ class Testing : MonoBehaviour
         ModuleProfile info = TableDataManager.Instance.GetTableData<ModuleProfile>("ModuleProfile");
         List<CityOrder> cityInfo = TableDataManager.Instance.GetTableDataList<CityOrder>("CityOrder");
 
-        Debug.Log(cityInfo);
+        Debug.Log(info);
         cityInfo = TableDataManager.Instance.GetTableData<List<CityOrder>>("CityOrder"); //错误读取
         Debug.Log(cityInfo);
     }

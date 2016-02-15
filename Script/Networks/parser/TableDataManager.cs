@@ -85,7 +85,7 @@ namespace Networks.parser
         }
 
         /// <summary>
-        /// 返回数据表
+        /// 返回数据表（列表形式）
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="tableName">表名</param>
